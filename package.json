@@ -1,5 +1,5 @@
 {
-   "name": "electron-ts-vue",
+   "name": "TelloApp",
    "version": "0.0.1",
    "main": "src/dist/electron/main.js",
    "scripts": {
@@ -31,10 +31,10 @@
       "wait-on": "^6.0.1"
    },
    "author": "Nils Ramstöck",
-   "description": "A template for an Electron App with Vue 3 Typescript using Vite",
+   "description": "Controller for the Tello drone",
    "license": "MIT",
    "bugs": {
-      "url": "https://github.com/NilsRamstoeck/electron-ts-vue/issues"
+      "url": "https://github.com/NilsRamstoeck/TelloApp/issues"
    },
-   "homepage": "https://github.com/NilsRamstoeck/electron-ts-vue#readme"
+   "homepage": "https://github.com/NilsRamstoeck/TelloApp#readme"
 }
