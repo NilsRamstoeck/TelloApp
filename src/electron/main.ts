@@ -4,12 +4,12 @@ import { app, BrowserWindow } from 'electron';
 
 const isDev = process.env.IS_DEV == "true" ? true : false;
 
-//hot reload
-if(isDev){
-   try {
-      require('electron-reloader')();
-   } catch (_) {}
-};
+// //hot reload
+// if(isDev){
+//    try {
+//       require('electron-reloader')(module);
+//    } catch (_) {}
+// };
 
 function createWindow() {
    // Create the browser window.

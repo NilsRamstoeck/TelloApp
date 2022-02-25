@@ -1,14 +1,14 @@
 // electron/preload.js
 
-// All of the Node.js APIs are available in the preload process.
-// It has the same sandbox as a Chrome extension.
-window.addEventListener('DOMContentLoaded', () => {
-   const replaceText = (selector: string, text: string) => {
-      const element = document.getElementById(selector);
-      if (element) element.innerText = text;
-   }
+import { contextBridge } from 'electron';
+import {TelloController} from './tello-controller';
 
-   for (const dependency of ['chrome', 'node', 'electron']) {
-      replaceText(`${dependency}-version`, process.versions[dependency] as string);
-   }
-});
+const telloController = new TelloController;
+
+contextBridge.exposeInMainWorld('tello', {
+   sendCommand: (cmd: string) => telloController.sendCommand(cmd),
+   startVideoStream: () => telloController.startVideoStream(),
+   stopVideoStream: () => telloController.stopVideoStream(),
+   addEventListener: (event: string, callback: EventListenerOrEventListenerObject) => telloController.addEventListener(event, callback),
+   attachStreamToCanvas: (canvas: HTMLCanvasElement) => telloController.attachStreamToCanvas(canvas)
+})

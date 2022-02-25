@@ -1,21 +1,38 @@
 <script setup lang="ts">
-// This starter template is using Vue 3 <script setup> SFCs
-// Check out https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup
-import HelloWorld from './components/HelloWorld.vue'
+import VideoStream from './components/VideoStream.vue'
+
+const telloController = window.tello;
+
+function streamon(): void {
+   telloController.startVideoStream();
+}
+
+function streamoff(): void {
+   telloController.stopVideoStream();
+}
+
+async function command(): void {
+   const response = await telloController.sendCommand('command');
+   console.log(response);
+}
+
+
+async function battery(): void {
+   const battery_level = await telloController.sendCommand('battery?');
+   console.log(battery_level);
+}
+
 </script>
 
 <template>
-  <img alt="Vue logo" src="./assets/logo.png" />
-  <HelloWorld msg="Hello Vue 3 + TypeScript + Vite" />
+   <VideoStream source="0.0.0.0:1111"></VideoStream>
+   <button @click="streamon">Stream On</button>
+   <button @click="streamoff">Stream Off</button>
+   <button @click="command">Command</button>
+   <button @click="battery">Battery</button>
 </template>
 
+
 <style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
+
 </style>
