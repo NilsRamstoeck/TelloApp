@@ -13,7 +13,9 @@ export default {
    mounted: function () {
       const canvas = document.querySelector('canvas#video-canvas');
       console.log(canvas);
-      window.tello.attachStreamToCanvas(canvas);
+      // window.tello.attachStreamToCanvas(canvas);
+      const url = 'ws://localhost:3001/stream';
+		var player = new JSMpeg.Player(url, {canvas: canvas});
    }
 }
 </script>

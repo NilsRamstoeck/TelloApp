@@ -1,4 +1,4 @@
-import {UDPVideoSocket} from './video-socket';
+import {UDPStreamRelay} from './UDPStreamRelay';
 import {createSocket, Socket} from 'dgram';
 
 //TELLO COMMANDS//
@@ -27,7 +27,7 @@ export class TelloController implements EventTarget{
    settings: TelloSettings; //Controller Settings
    cmdSocket: Socket;       //Socket to send SDK Commands on
    stateSocket: Socket;
-   streamSocket: UDPVideoSocket;
+   streamRelay: UDPStreamRelay;
    eventTarget: EventTarget;
 
    //save settings and initilize sockets
@@ -39,6 +39,7 @@ export class TelloController implements EventTarget{
       this.cmdSocket = createTelloSocket(this.settings.cmdPort, this.settings.telloIP);
       this.stateSocket = createTelloSocket(this.settings.statePort);
 
+      this.cmdSocket.bind(this.settings.cmdPort);
       this.stateSocket.bind(this.settings.statePort, '0.0.0.0');
 
       this.stateSocket.on('message', (msg, _rinfo) => this.dispatchEvent(
@@ -47,7 +48,7 @@ export class TelloController implements EventTarget{
          }))
       );
 
-      this.streamSocket = new UDPVideoSocket(this.settings.streamPort);
+      this.streamRelay = new UDPStreamRelay(this.settings.streamPort);
 
       //Enter SDK Mode
       // this.sendCommand(ENTER_SDK_MODE);
@@ -69,28 +70,25 @@ export class TelloController implements EventTarget{
          this.cmdSocket.send(cmd, this.settings.cmdPort, this.settings.telloIP);
          this.cmdSocket.once('message',  (msg, _rinfo): void => {
             resolve(msg.toString());
-         })
+         });
          //set timeout to remove event listener in case no reponse comes
          setTimeout(function () {
             reject('TIMEOUT');
-         }, 1000)
+         }, 1000);
       })
    }
 
    startVideoStream(): void{
       this.sendCommand(STREAM_ON);
-      // this.streamSocket.bind(this.settings.streamPort);
+      this.cmdSocket.once('message',  (msg, _rinfo): void => {
+         this.streamRelay.startVideoStream();
+      });
    }
 
    stopVideoStream(): void{
       this.sendCommand(STREAM_OFF);
-      // this.streamSocket.disconnect();
+      this.streamRelay.stopVideoStream();
    }
-
-   attachStreamToCanvas(canvas: HTMLCanvasElement): void {
-      this.streamSocket.attachStreamToCanvas(canvas);
-   }
-
 
 }
 
@@ -106,6 +104,6 @@ function createTelloSocket(port: number, ip = '0.0.0.0'):Socket {
    //    console.log(`server got: ${msg} from ${rinfo.address}:${rinfo.port}`);
    // });
 
-   // socket.bind(port);
+   // socket.bind(5232);
    return socket;
 }

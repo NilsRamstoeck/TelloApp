@@ -10,5 +10,4 @@ contextBridge.exposeInMainWorld('tello', {
    startVideoStream: () => telloController.startVideoStream(),
    stopVideoStream: () => telloController.stopVideoStream(),
    addEventListener: (event: string, callback: EventListenerOrEventListenerObject) => telloController.addEventListener(event, callback),
-   attachStreamToCanvas: (canvas: HTMLCanvasElement) => telloController.attachStreamToCanvas(canvas)
 })

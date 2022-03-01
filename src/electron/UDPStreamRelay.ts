@@ -1,16 +1,20 @@
 import {WebSocketServer} from 'ws';
 import {spawn} from 'child_process';
 import {Server} from 'http';
-import JSMpeg from 'jsmpeg';
 
 const WS_STREAM_PORT = 3001;
 
-export class UDPVideoSocket {
+export class UDPStreamRelay {
    streamServer: Server;
    webSocketServer: WebSocketServer;
+   udpStreamPort: number;
+   udpStreamAdress: string;
+   streamer: import("child_process").ChildProcessWithoutNullStreams;
 
 
    constructor(udpStreamPort: number, udpStreamAdress = '0.0.0.0'){
+      this.udpStreamPort = udpStreamPort;
+      this.udpStreamAdress = udpStreamAdress;
       const self = this; //make object available in different contexts
       this.streamServer = new Server(function(request, _response) {
          // When data comes from the stream (FFmpeg) we'll pass this to the web socket
@@ -28,33 +32,27 @@ export class UDPVideoSocket {
       this.webSocketServer = new WebSocketServer({
          server: this.streamServer
       });
-
-      // Delay for 3 seconds before we start ffmpeg
-      setTimeout(function() {
-         var args = [
-            "-i", `udp://${udpStreamAdress}:${udpStreamPort}`,
-            "-r", "30",
-            "-s", "960x720",
-            "-codec:v", "mpeg1video",
-            "-b", "800k",
-            "-f", "mpegts",
-            `http://127.0.0.1:${WS_STREAM_PORT}/stream`
-         ];
-
-         // Spawn an ffmpeg instance
-         var streamer = spawn('ffmpeg', args);
-         // Uncomment if you want to see ffmpeg stream info
-         //streamer.stderr.pipe(process.stderr);
-         streamer.on("exit", function(code){
-            console.log("Failure", code);
-         });
-      }, 3000);
    }
 
-   attachStreamToCanvas(canvas: HTMLCanvasElement): any{
-      const url = `ws://localhost:${WS_STREAM_PORT}/stream`;
-      console.log(canvas);
-      const player = JSMpeg(url, {canvas: canvas});
-      // return player;
+   startVideoStream(): void{
+      var args = [
+         "-i", `udp://${this.udpStreamAdress}:${this.udpStreamPort}`,
+         "-r", "60",
+         // "-s", "960x720",
+         "-s", "640x480",
+         // "-s", "480x360 ",
+         "-codec:v", "mpeg1video",
+         "-b", "1200k",
+         "-f", "mpegts",
+         '-tune', 'zerolatency',
+         `http://127.0.0.1:${WS_STREAM_PORT}/stream`
+      ];
+
+      // Spawn an ffmpeg instance
+      this.streamer = spawn('ffmpeg', args);
+   }
+
+   stopVideoStream(): void{
+      this.streamer.kill('SIGTERM');
    }
 }
