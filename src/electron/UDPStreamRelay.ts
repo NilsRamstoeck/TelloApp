@@ -1,5 +1,5 @@
 import {WebSocketServer} from 'ws';
-import {spawn} from 'child_process';
+import {spawn, ChildProcess} from 'child_process';
 import {Server} from 'http';
 
 const WS_STREAM_PORT = 3001;
@@ -9,12 +9,13 @@ export class UDPStreamRelay {
    webSocketServer: WebSocketServer;
    udpStreamPort: number;
    udpStreamAdress: string;
-   streamer: import("child_process").ChildProcessWithoutNullStreams;
+   streamer: ChildProcess | null;
 
 
    constructor(udpStreamPort: number, udpStreamAdress = '0.0.0.0'){
       this.udpStreamPort = udpStreamPort;
       this.udpStreamAdress = udpStreamAdress;
+      this.streamer = null;
       const self = this; //make object available in different contexts
       this.streamServer = new Server(function(request, _response) {
          // When data comes from the stream (FFmpeg) we'll pass this to the web socket
@@ -34,7 +35,8 @@ export class UDPStreamRelay {
       });
    }
 
-   startVideoStream(): void{
+   startVideoStream(): boolean{
+      if(this.streamer != null)return false;
       var args = [
          "-i", `udp://${this.udpStreamAdress}:${this.udpStreamPort}`,
          "-r", "60",
@@ -50,9 +52,14 @@ export class UDPStreamRelay {
 
       // Spawn an ffmpeg instance
       this.streamer = spawn('ffmpeg', args);
+      this.streamer.unref();
+      return true;
    }
 
-   stopVideoStream(): void{
+   stopVideoStream(): boolean{
+      if(this.streamer == null)return false;
       this.streamer.kill('SIGTERM');
+      this.streamer = null;
+      return true;
    }
 }
