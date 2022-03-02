@@ -60,7 +60,7 @@ export class TelloController implements EventTarget{
       return new Promise((resolve: (response: string) => void, reject: (reason: string) => void): void => {
          //set timeout to remove event listener in case no reponse comes
          const timeout = setTimeout(function () {
-            reject('TIMEOUT');
+            reject('TIMEOUT: ' + cmd);
          }, 1000);
 
          this.cmdSocket.send(cmd, this.settings.cmdPort, this.settings.telloIP);
@@ -89,8 +89,9 @@ export class TelloController implements EventTarget{
    stopVideoStream(): void{
       this.sendCommand('streamoff').finally(() => {
          if (this.streamRelay.stopVideoStream())
-         this.dispatchEvent(new Event('stream_start'));
-      });
+         this.dispatchEvent(new Event('stream_stop'));
+      })
+      .catch((_reason) => {});
    }
 
 }

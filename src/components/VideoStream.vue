@@ -1,4 +1,7 @@
 <script setup lang="ts">
+const props = defineProps({
+   source: String
+})
 </script>
 
 <template>
@@ -12,14 +15,10 @@ export default {
    name: 'VideoStream',
    mounted: function () {
       const canvas = document.querySelector('canvas#video-canvas');
-      console.log(canvas);
-      // window.tello.attachStreamToCanvas(canvas);
-      const url = 'ws://localhost:3001/stream';
-		var player = new JSMpeg.Player(url, {canvas: canvas});
+      var player = new JSMpeg.Player(this.source, {canvas: canvas});
    }
 }
 </script>
 
 <style scoped>
-
 </style>

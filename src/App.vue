@@ -25,7 +25,7 @@ async function battery(): void {
 </script>
 
 <template>
-   <VideoStream source="0.0.0.0:1111"></VideoStream>
+   <VideoStream source="ws://localhost:3001/stream"></VideoStream>
    <button @click="streamon">Stream On</button>
    <button @click="streamoff">Stream Off</button>
    <button @click="command">Command</button>
